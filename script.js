@@ -40,14 +40,32 @@ const Players = (function() {
     }
 })();
 
-// const Game = (function() {
-//     let 
-// })();
+const Game = (function() {
+    function play(cell, currentPlayer) {
+        GameBoard.drawMark(cell, currentPlayer)
+        Players.changePlayer()
+        GameBoard.checkBoard()
+
+        console.log(GameBoard.winner)
+        
+        // if (winner === 'Player 1' || winner === 'Player 2') {
+        //     const winnerDiv = document.querySelector('.winner')
+        //     const gameOver = document.querySelector('.game-over')
+
+        //     winnerDiv.textContent = GameBoard.checkBoard()
+        //     gameOver.style.visibility = 'visible'
+        // }
+    }
+
+    return {
+        play
+    }
+})();
 
 const GameBoard = (function() {
     const gameBoardDiv = document.querySelector('.gameboard')
 
-    const winningCells = [
+    const winningCombinations = [
         // Rows
         [11, 12, 13],
         [21, 22, 23],
@@ -69,7 +87,7 @@ const GameBoard = (function() {
                 gameCell.setAttribute('data-mark', '')
                 gameCell.classList.add('cell')
                 gameCell.onclick = function() {
-                    drawMark(this, Players.currentPlayer)
+                    Game.play(this, Players.currentPlayer)
                     Players.updateCurrentPlayerDiv()
                 }
     
@@ -101,12 +119,44 @@ const GameBoard = (function() {
             cell.style.backgroundRepeat = 'no-repeat'
             cell.style.backgroundPosition = 'center'
             cell.setAttribute('data-mark', currentPlayer.playerMark)
-    
-            Players.changePlayer()
         }
     }
 
+    let winner = undefined
+
+    function checkBoard() {
+        const cells = gameBoardDiv.querySelectorAll('.cell')
+
+        winningCombinations.map(combination => {
+            winningX = 0
+            winningO = 0
+
+            combination.map(xy => {
+                cells.forEach(cell => {
+                    if (cell.getAttribute('data-mark') !== '' && cell.getAttribute('data-xy') === xy.toString()) {
+                        if (cell.getAttribute('data-mark') === 'x') {
+                            winningX ++
+                        } else {
+                            winningO ++
+                        }
+                    }
+                })
+            })
+
+            if (winningX === 3) {
+                winner = 'Player 1'
+            }
+            
+            if (winningO === 3) {
+                winner = 'Player 2'
+            }
+        })
+    }
+
     return {
-        winningCells
+        winningCombinations,
+        drawMark,
+        checkBoard,
+        winner
     }
 })();
