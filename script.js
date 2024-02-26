@@ -41,24 +41,33 @@ const Players = (function() {
 })();
 
 const Game = (function() {
+    const winnerDiv = document.querySelector('.winner')
+    const gameOver = document.querySelector('.game-over')
+    const newGameDiv = document.querySelector('.new-game')
+
     function play(cell, currentPlayer) {
-        GameBoard.drawMark(cell, currentPlayer)
-        Players.changePlayer()
-        GameBoard.checkBoard()
+        if (cell.getAttribute('data-mark') === '') {
+            GameBoard.drawMark(cell, currentPlayer)
+            Players.changePlayer()
+            GameBoard.checkBoard()
 
-        console.log(GameBoard.winner)
-        
-        // if (winner === 'Player 1' || winner === 'Player 2') {
-        //     const winnerDiv = document.querySelector('.winner')
-        //     const gameOver = document.querySelector('.game-over')
-
-        //     winnerDiv.textContent = GameBoard.checkBoard()
-        //     gameOver.style.visibility = 'visible'
-        // }
+            
+            if (GameBoard.winner === 'Player 1' || GameBoard.winner === 'Player 2') {
+                winnerDiv.textContent = `${GameBoard.winner} Won!`
+                gameOver.classList.toggle('game-over-won')
+                newGameDiv.classList.toggle('z-index')
+            } else if (GameBoard.winner === 'Tie') {
+                winnerDiv.textContent = `It's a ${GameBoard.winner}!`
+                gameOver.classList.toggle('game-over-won')
+                newGameDiv.classList.toggle('z-index')
+            }
+        }
     }
 
     return {
-        play
+        play,
+        gameOver,
+        newGameDiv
     }
 })();
 
@@ -110,22 +119,21 @@ const GameBoard = (function() {
 
     function drawMark(cell, currentPlayer) {
         if (cell.getAttribute('data-mark') === '') {
-            cell.style.backgroundImage = `url(${currentPlayer.playerBg})`
             if (currentPlayer.playerName === 'Player 1') {
-                cell.style.backgroundSize = '90%'
+                cell.classList.toggle('p1')
             } else {
-                cell.style.backgroundSize = '70%'
+                cell.classList.toggle('p2')
             }
-            cell.style.backgroundRepeat = 'no-repeat'
-            cell.style.backgroundPosition = 'center'
             cell.setAttribute('data-mark', currentPlayer.playerMark)
         }
     }
 
     let winner = undefined
 
+    const cells = gameBoardDiv.querySelectorAll('.cell')
+
     function checkBoard() {
-        const cells = gameBoardDiv.querySelectorAll('.cell')
+        const availableCells = Array.from(cells).filter(cell => cell.getAttribute('data-mark') === '').length
 
         winningCombinations.map(combination => {
             winningX = 0
@@ -144,14 +152,51 @@ const GameBoard = (function() {
             })
 
             if (winningX === 3) {
-                winner = 'Player 1'
+                this.winner = 'Player 1'
             }
             
             if (winningO === 3) {
-                winner = 'Player 2'
+                this.winner = 'Player 2'
+            }
+
+            if (availableCells === 0) {
+                this.winner = 'Tie'
+            }
+
+            if (winningX === 3 || winningO === 3 || availableCells === 0) {
+                cells.forEach(cell => cell.disabled = true)
             }
         })
     }
+
+    function reset() {
+        const resetBtn = document.querySelector('.new-game-btn')
+        
+        resetBtn.addEventListener('click', function() {
+            Array.from(cells).map(cell => {
+                cell.setAttribute('data-mark', '')
+                cell.disabled = false
+                if (cell.classList.contains('p1')) {
+                    cell.classList.remove('p1')
+                } else if (cell.classList.contains('p2')) {
+                    cell.classList.remove('p2')
+                }
+            })
+
+            GameBoard.winner = undefined
+            if (Players.currentPlayer.playerName === 'Player 2') {
+                Players.changePlayer()
+                Players.updateCurrentPlayerDiv()
+            }
+
+            if (Game.gameOver.classList.contains('game-over-won')) {
+                Game.gameOver.classList.toggle('game-over-won')
+                Game.newGameDiv.classList.toggle('z-index')
+            }
+        })
+    }
+
+    reset()
 
     return {
         winningCombinations,

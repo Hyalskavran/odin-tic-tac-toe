@@ -18,6 +18,7 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     height: 100vh;
+    width: 100vw;
 }
 
 .container {
@@ -76,6 +77,20 @@ body {
         border-left: 1px solid black;
         border-right: 1px solid black;
     }
+
+    & .p1 {
+        background-image: url('img/X.svg');
+        background-size: 90%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    & .p2 {
+        background-image: url('img/O.svg');
+        background-size: 70%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
 }
 
 .new-game {
@@ -100,13 +115,26 @@ body {
 }
 
 .game-over {
+    display: flex;
+    flex-direction: column;
     font-weight: 700;
     font-size: 5rem;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center; /* Center the content horizontally */
+    width: 100%;
+    height: 100%;
     z-index: 1;
     visibility: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-over-won {
+    visibility: visible;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.z-index {
+    color: white;
+    z-index: 1;
 }
